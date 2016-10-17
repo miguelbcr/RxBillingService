@@ -1,0 +1,25 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/colorYellow"
+    tools:context="com.miguelbcr.io.rxbillingservice.RootFragment"
+    >
+
+  <TextView
+      android:id="@+id/textView"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:padding="20dp"
+      android:text="@string/hello_blank_fragment"
+      />
+
+  <fragment
+      android:id="@+id/fragment_nested"
+      android:name="com.miguelbcr.io.rxbillingservice.NestedFragment"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      />
+
+</LinearLayout>
