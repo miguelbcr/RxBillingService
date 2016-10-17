@@ -1,18 +1,15 @@
 package com.miguelbcr.io.rx_billing_service;
 
 import android.app.Activity;
-import android.app.Application;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import com.android.vending.billing.IInAppBillingService;
 import com.google.common.base.Throwables;
 import com.google.gson.Gson;
@@ -23,15 +20,12 @@ import com.miguelbcr.io.rx_billing_service.entities.ProductType;
 import com.miguelbcr.io.rx_billing_service.entities.Purchase;
 import com.miguelbcr.io.rx_billing_service.entities.SkuDetails;
 import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.ObservableSource;
-import io.reactivex.ObservableTransformer;
 import io.reactivex.Single;
 import io.reactivex.SingleEmitter;
 import io.reactivex.SingleOnSubscribe;
 import io.reactivex.SingleSource;
-import io.reactivex.functions.Action;
+import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.subjects.PublishSubject;
 import java.io.IOException;
@@ -42,76 +36,77 @@ import rx_activity_result2.RxActivityResult;
 
 class RxBillingServiceImpl {
   private final int VERSION = 5;
-  private final RxBillingService rxBillingService;
   private final TargetUi targetUi;
   private Context context;
-  private final PublishSubject<RxBillingService> serviceConnectedSubject = PublishSubject.create();
   private final PublishSubject<Purchase> purchaseSubject = PublishSubject.create();
   private IInAppBillingService appBillingService;
-  private ServiceConnection serviceConnection = new ServiceConnection() {
-    @Override public void onServiceDisconnected(ComponentName name) {
-      Log.e("XXXXXXXXXXXXXXX", "onServiceDisconnected()");
-      appBillingService = null;
-      serviceConnectedSubject.onError(new Throwable("IInAppBillingService disconnected"));
-    }
+  private ServiceConnection serviceConnection;
 
-    @Override public void onServiceConnected(ComponentName name, final IBinder service) {
-      //new Handler().postDelayed(new Runnable() {
-      //  @Override public void run() {
-          Log.e("XXXXXXXXXXXXXXX", "IInAppBillingService connected");
-          appBillingService = IInAppBillingService.Stub.asInterface(service);
-          serviceConnectedSubject.onNext(rxBillingService);
-          //serviceConnectedSubject.onComplete();
-        }
-      //}, 3000);
-    //}
-  };
-
-
-  RxBillingServiceImpl(RxBillingService rxBillingService, Object targetUiObject) {
-    this.rxBillingService = rxBillingService;
+  RxBillingServiceImpl(Object targetUiObject) {
     this.targetUi = new TargetUi(targetUiObject);
     this.context = targetUi.getContext();
-    bindService();
   }
 
-  Observable<RxBillingService> getServiceConnected() {
-    return serviceConnectedSubject.take(1);
+  private String getTargetClassName() {
+    return targetUi.fragment() == null ? targetUi.activity().getClass().getSimpleName()
+        : targetUi.fragment().getClass().getSimpleName();
   }
 
-  void bindService() {
-    Log.e("XXXXXXXXXXXXXXX", "bindService() " + serviceConnection);
+  private Single<Boolean> connectService() {
+    return Single.create(new SingleOnSubscribe<Boolean>() {
+      @Override public void subscribe(final SingleEmitter<Boolean> emitter) throws Exception {
+        serviceConnection = new ServiceConnection() {
+          @Override public void onServiceDisconnected(ComponentName name) {
+            RxBillingServiceLogger.log(getTargetClassName(), "Service Disconnected");
+            appBillingService = null;
+            emitter.onError(new Throwable("IInAppBillingService disconnected"));
+          }
+
+          @Override public void onServiceConnected(ComponentName name, final IBinder service) {
+            RxBillingServiceLogger.log(getTargetClassName(), "Service Connected");
+            appBillingService = IInAppBillingService.Stub.asInterface(service);
+            emitter.onSuccess(true);
+          }
+        };
+
+        bindService();
+      }
+    });
+  }
+
+  private void bindService() {
+    RxBillingServiceLogger.log(getTargetClassName(), "Bind Service");
     Intent serviceIntent = new Intent("com.android.vending.billing.InAppBillingService.BIND");
     serviceIntent.setPackage("com.android.vending");
     context.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
   }
 
-  void unbindService() {
-    Log.e("XXXXXXXXXXXXXXX", "unbindService()");
+  private void unbindService() {
+    RxBillingServiceLogger.log(getTargetClassName(), "Unbind Service");
     if (appBillingService != null) {
       context.unbindService(serviceConnection);
       appBillingService = null;
-      context = null;
-      targetUi.setUi(null);
+      //context = null;
+      //targetUi.setUi(null);
     }
   }
 
-  Observable<Boolean> isBillingSupported(final ProductType productType) {
-    return Observable.create(new ObservableOnSubscribe<Boolean>() {
-      @Override public void subscribe(ObservableEmitter<Boolean> emitter) throws Exception {
-        emitter.onNext(appBillingService.isBillingSupported(VERSION, context.getPackageName(),
-            productType.getName()) == BillingResponseCodes.OK);
-        emitter.onComplete();
-      }
-    }).doOnComplete(new Action() {
-      @Override public void run() throws Exception {
-        String className =
-            targetUi.fragment() == null ? targetUi.activity().getClass().getSimpleName()
-                : targetUi.fragment().getClass().getSimpleName();
-        Log.e("XXXXXXXXXXXXXXX", className + " isBillingSupported doOnComplete()");
-        unbindService();
-      }
-    });
+  Single<Boolean> isBillingSupported(final ProductType productType) {
+    return connectService()
+        .map(new Function<Boolean, Boolean>() {
+          @Override public Boolean apply(Boolean isServiceConnected) throws Exception {
+            boolean isBillingSupported = isServiceConnected
+                && appBillingService.isBillingSupported(VERSION, context.getPackageName(),
+                productType.getName()) == BillingResponseCodes.OK;
+
+            RxBillingServiceLogger.log(getTargetClassName(), "is Billing Supported = " + isBillingSupported);
+            return isBillingSupported;
+          }
+        }).doOnSuccess(new Consumer<Object>() {
+          @Override public void accept(Object _I) throws Exception {
+            unbindService();
+          }
+        });
   }
 
   public Single<List<SkuDetails>> getSkuDetails(final ProductType productType,

@@ -12,8 +12,7 @@
       android:id="@+id/textView"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:padding="20dp"
-      android:text="Hello World!"/>
+      android:padding="20dp"/>
   <fragment
       android:name="com.miguelbcr.io.rxbillingservice.RootFragment"
       android:layout_width="match_parent"

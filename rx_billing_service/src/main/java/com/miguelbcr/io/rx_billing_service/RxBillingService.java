@@ -3,10 +3,16 @@ package com.miguelbcr.io.rx_billing_service;
 import android.app.Activity;
 import android.app.Application;
 import android.support.v4.app.Fragment;
+import android.util.Log;
+import com.miguelbcr.io.rx_billing_service.entities.BillingResponseCodes;
 import com.miguelbcr.io.rx_billing_service.entities.ProductType;
 import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.ObservableSource;
 import io.reactivex.ObservableTransformer;
+import io.reactivex.Single;
+import io.reactivex.functions.Action;
 import io.reactivex.functions.Function;
 import rx_activity_result2.RxActivityResult;
 
@@ -64,34 +70,19 @@ public class RxBillingService {
     RxActivityResult.register(application);
   }
 
-  public static <T extends Activity> Observable<RxBillingService> getInstance(T activity) {
-    return new RxBillingService(activity).getServiceConnected();
+  public static <T extends Activity> RxBillingService getInstance(T activity) {
+    return new RxBillingService(activity);
   }
 
-  public static <T extends Fragment> Observable<RxBillingService> getInstance(T fragment) {
-    return new RxBillingService(fragment).getServiceConnected();
+  public static <T extends Fragment> RxBillingService getInstance(T fragment) {
+    return new RxBillingService(fragment);
   }
 
   private RxBillingService(Object targetUiObject) {
-    this.rxBillingServiceImpl = new RxBillingServiceImpl(this, targetUiObject);
+    this.rxBillingServiceImpl = new RxBillingServiceImpl(targetUiObject);
   }
 
-  private Observable<RxBillingService> getServiceConnected() {
-    return rxBillingServiceImpl.getServiceConnected();
-  }
-
-  public static ObservableTransformer<RxBillingService, Boolean> isBillingSupported(
-      final ProductType productType) {
-    return new ObservableTransformer<RxBillingService, Boolean>() {
-      @Override public ObservableSource<Boolean> apply(Observable<RxBillingService> loader)
-          throws Exception {
-        return loader.flatMap(new Function<RxBillingService, ObservableSource<? extends Boolean>>() {
-          @Override public ObservableSource<? extends Boolean> apply(final RxBillingService rxBillingService)
-              throws Exception {
-            return rxBillingService.rxBillingServiceImpl.isBillingSupported(productType);
-          }
-        });
-      }
-    };
+  public Single<Boolean> isBillingSupported(final ProductType productType) {
+    return rxBillingServiceImpl.isBillingSupported(productType);
   }
 }

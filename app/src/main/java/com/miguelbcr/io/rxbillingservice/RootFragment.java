@@ -3,7 +3,6 @@ package com.miguelbcr.io.rxbillingservice;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +13,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 public class RootFragment extends Fragment {
+  private TextView textView;
 
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -23,22 +23,26 @@ public class RootFragment extends Fragment {
 
   @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
+    textView = (TextView) view.findViewById(R.id.textView);
 
-    TextView textView = (TextView) view.findViewById(R.id.textView);
+    isBillingSupported(ProductType.IN_APP);
+    isBillingSupported(ProductType.SUBS);
+  }
 
+  private void isBillingSupported(ProductType productType) {
     RxBillingService.getInstance(this)
+        .isBillingSupported(productType)
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .compose(RxBillingService.isBillingSupported(ProductType.IN_APP))
-        //.flatMap(rxBillingService -> rxBillingService.isBillingSupported_2(ProductType.IN_APP))
         .subscribe(supported -> {
-              Log.e("XXXXXXXXXXXXXXX", "RootFragment: Billing supported = " + supported);
-              textView.setText("RootFragment: Billing supported = " + supported);
-            },
-            throwable -> {
-              throwable.printStackTrace();
-              textView.setText("RootFragment: error = " + throwable.getMessage());
-            }
-        );
+          String text = textView.getText().toString();
+          text += "Billing supported (" + productType.getName() + ") = " + supported + "\n";
+          textView.setText(text);
+        }, throwable -> {
+          throwable.printStackTrace();
+          String text = textView.getText().toString();
+          text += "error = " + throwable.getMessage() + "\n";
+          textView.setText(text);
+        });
   }
 }
