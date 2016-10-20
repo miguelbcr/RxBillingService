@@ -3,17 +3,11 @@ package com.miguelbcr.io.rx_billing_service;
 import android.app.Activity;
 import android.app.Application;
 import android.support.v4.app.Fragment;
-import android.util.Log;
-import com.miguelbcr.io.rx_billing_service.entities.BillingResponseCodes;
 import com.miguelbcr.io.rx_billing_service.entities.ProductType;
-import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.ObservableSource;
-import io.reactivex.ObservableTransformer;
+import com.miguelbcr.io.rx_billing_service.entities.Purchase;
+import com.miguelbcr.io.rx_billing_service.entities.SkuDetails;
 import io.reactivex.Single;
-import io.reactivex.functions.Action;
-import io.reactivex.functions.Function;
+import java.util.List;
 import rx_activity_result2.RxActivityResult;
 
 /**
@@ -82,7 +76,25 @@ public class RxBillingService {
     this.rxBillingServiceImpl = new RxBillingServiceImpl(targetUiObject);
   }
 
-  public Single<Boolean> isBillingSupported(final ProductType productType) {
+  public Single<Boolean> isBillingSupported(ProductType productType) {
     return rxBillingServiceImpl.isBillingSupported(productType);
+  }
+
+  public Single<List<SkuDetails>> getSkuDetails(ProductType productType, List<String> productIds) {
+    return rxBillingServiceImpl.getSkuDetails(productType, productIds);
+  }
+
+  public Single<Purchase> purchase(ProductType productType, String productId,
+      String developerPayload) {
+    return rxBillingServiceImpl.purchase(productType, productId, developerPayload);
+  }
+
+  public Single<Boolean> consumePurchase(String token) {
+    return rxBillingServiceImpl.consumePurchase(token);
+  }
+
+  public Single<Purchase> purchaseAndConsume(ProductType productType, String productId,
+      String developerPayload) {
+    return rxBillingServiceImpl.purchaseAndConsume(productType, productId, developerPayload);
   }
 }

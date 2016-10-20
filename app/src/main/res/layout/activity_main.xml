@@ -8,14 +8,21 @@
     android:orientation="vertical"
     tools:context="com.miguelbcr.io.rxbillingservice.MainActivity">
 
+  <Button
+      android:id="@+id/bt_buy"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="BUY"
+      />
+
   <TextView
       android:id="@+id/textView"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:padding="20dp"/>
-  <fragment
-      android:name="com.miguelbcr.io.rxbillingservice.RootFragment"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      />
+  <!--<fragment-->
+      <!--android:name="com.miguelbcr.io.rxbillingservice.RootFragment"-->
+      <!--android:layout_width="match_parent"-->
+      <!--android:layout_height="match_parent"-->
+      <!--/>-->
 </LinearLayout>
