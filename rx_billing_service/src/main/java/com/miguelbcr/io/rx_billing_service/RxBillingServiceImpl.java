@@ -258,14 +258,9 @@ class RxBillingServiceImpl {
         "getBuyIntent() result code(" + result.resultCode() + ") OK = " + (result.resultCode()
             == Activity.RESULT_OK));
 
-    if (result.resultCode() != Activity.RESULT_OK) {
-      purchaseSubject.onError(new RxBillingServiceException(RxBillingServiceError.USER_CANCELED));
-      return Observable.just(Ignore.Get);
-    }
-
     int response = result.data().getIntExtra(RESPONSE_CODE, RxBillingServiceError.OK);
 
-    if (response != RxBillingServiceError.OK) {
+    if (result.resultCode() != Activity.RESULT_OK || response != RxBillingServiceError.OK) {
       purchaseSubject.onError(new RxBillingServiceException(response));
       return Observable.just(Ignore.Get);
     }
@@ -277,7 +272,7 @@ class RxBillingServiceImpl {
 
     if (TextUtils.isEmpty(purchaseString)) {
       purchaseSubject.onError(
-          new RxBillingServiceException(RxBillingServiceError.PARSING_PURCHASE));
+          new RxBillingServiceException(RxBillingServiceError.ITEM_UNAVAILABLE));
       return Observable.just(Ignore.Get);
     }
 

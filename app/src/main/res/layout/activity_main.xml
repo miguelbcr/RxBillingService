@@ -5,48 +5,59 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:gravity="center_horizontal"
+    android:orientation="vertical"
     tools:context="com.miguelbcr.io.rxbillingservice.MainActivity"
     >
 
-  <RelativeLayout
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:background="@color/colorBlue"
-      >
-  <android.support.v7.widget.AppCompatSpinner
-      android:id="@+id/spinner"
-      android:layout_width="wrap_content"
-      android:layout_centerHorizontal="true"
+  <LinearLayout
+      android:layout_width="match_parent"
       android:layout_height="40dp"
-      />
-  </RelativeLayout>
+      android:background="@color/colorBlue"
+      android:orientation="horizontal"
+      >
+    <android.support.v7.widget.AppCompatSpinner
+        android:id="@+id/spinner_product_types"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_weight="2"
+        />
+    <android.support.v7.widget.AppCompatSpinner
+        android:id="@+id/spinner_product_ids"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="50dp"
+        android:layout_weight="3"
+        />
+  </LinearLayout>
 
   <LinearLayout
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
+      android:gravity="center_vertical"
       android:orientation="horizontal"
       >
     <Button
         android:id="@+id/bt_sku_details"
         android:layout_width="0dp"
-        android:layout_weight="1"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:text="DETAILS"
         />
     <Button
         android:id="@+id/bt_buy"
         android:layout_width="0dp"
-        android:layout_weight="1"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:text="BUY"
         />
     <Button
         android:id="@+id/bt_consume"
         android:layout_width="0dp"
-        android:layout_weight="1"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:text="CONSUME"
         />
   </LinearLayout>
@@ -54,30 +65,38 @@
   <LinearLayout
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
+      android:gravity="center_vertical"
       android:orientation="horizontal"
       >
     <Button
         android:id="@+id/bt_buy_consume"
         android:layout_width="0dp"
-        android:layout_weight="1"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:text="BUY AND CONSUME"
         />
     <Button
         android:id="@+id/bt_my_purchases"
         android:layout_width="0dp"
-        android:layout_weight="1"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:text="MY PURCHASES"
         />
     <Button
-        android:id="@+id/bt_clear"
+        android:id="@+id/bt_billing_supported"
         android:layout_width="0dp"
-        android:layout_weight="1"
         android:layout_height="wrap_content"
-        android:text="CLEAR LOG"
+        android:layout_weight="1"
+        android:text="BILLING SUPPORTED"
         />
   </LinearLayout>
+
+  <Button
+      android:id="@+id/bt_clear"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="CLEAR LOG"
+      />
 
   <ScrollView
       android:layout_width="match_parent"

@@ -18,6 +18,7 @@ import java.util.Arrays;
 public class MainActivity extends AppCompatActivity {
   private TextView tvLog;
   private String productId, token;  // TODO guardar token en preferences
+  private ProductType productType;
 
 
   @Override protected void onCreate(Bundle savedInstanceState) {
@@ -28,10 +29,58 @@ public class MainActivity extends AppCompatActivity {
     View btConsume = findViewById(R.id.bt_consume);
     View btBuyConsume = findViewById(R.id.bt_buy_consume);
     View btMyPurchases = findViewById(R.id.bt_my_purchases);
+    View btSupported = findViewById(R.id.bt_billing_supported);
     View btClear = findViewById(R.id.bt_clear);
-    Spinner spinner = (Spinner) findViewById(R.id.spinner);
+    Spinner spProductsTypes = (Spinner) findViewById(R.id.spinner_product_types);
+    Spinner spProductsIds = (Spinner) findViewById(R.id.spinner_product_ids);
     tvLog = (TextView) findViewById(R.id.tv_log);
 
+    initProductTypes(spProductsTypes);
+    initProductIds(spProductsIds);
+
+    btClear.setOnClickListener(v -> tvLog.setText(""));
+
+    btSkuDetails.setOnClickListener(v -> {
+      skuDetails(productType, productId);
+    });
+
+    btBuy.setOnClickListener(v -> {
+      final String developerPayload = String.valueOf(System.currentTimeMillis());
+      purchase(productType, productId, developerPayload);
+    });
+
+    btConsume.setOnClickListener(v -> consumePurchase());
+
+    btBuyConsume.setOnClickListener(v -> {
+      final String developerPayload = String.valueOf(System.currentTimeMillis());
+      purchaseAndConsume(productType, productId, developerPayload);
+    });
+
+    btMyPurchases.setOnClickListener(v -> purchases(productType));
+
+    btSupported.setOnClickListener(v -> isBillingSupported(productType));
+  }
+
+  private void initProductTypes(Spinner spinner) {
+    ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+        R.array.product_types, android.R.layout.simple_spinner_item);
+    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+    spinner.setAdapter(adapter);
+
+    spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+      @Override
+      public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        productType = position == 0 ? ProductType.IN_APP : ProductType.SUBS;
+      }
+
+      @Override public void onNothingSelected(AdapterView<?> parent) {
+      }
+    });
+
+    productType = ProductType.IN_APP;
+  }
+
+  private void initProductIds(Spinner spinner) {
     ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
         R.array.product_ids, android.R.layout.simple_spinner_item);
     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -46,30 +95,6 @@ public class MainActivity extends AppCompatActivity {
       @Override public void onNothingSelected(AdapterView<?> parent) {
       }
     });
-
-    btClear.setOnClickListener(v -> tvLog.setText(""));
-
-    btSkuDetails.setOnClickListener(v -> {
-      skuDetails(ProductType.IN_APP, productId);
-    });
-
-    btBuy.setOnClickListener(v -> {
-      final String developerPayload = String.valueOf(System.currentTimeMillis());
-      purchase(ProductType.IN_APP, productId, developerPayload);
-    });
-
-    btConsume.setOnClickListener(v -> consumePurchase());
-
-    btBuyConsume.setOnClickListener(v -> {
-      final String developerPayload = String.valueOf(System.currentTimeMillis());
-      purchaseAndConsume(ProductType.IN_APP, productId, developerPayload);
-    });
-
-    btMyPurchases.setOnClickListener(v -> purchases(ProductType.IN_APP));
-
-    //isBillingSupported(ProductType.IN_APP);
-    //isBillingSupported(ProductType.SUBS);
-
   }
 
   private void isBillingSupported(ProductType productType) {
@@ -79,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(supported -> {
           String text = "";
-          text += "Billing supported (" + productType.getName() + ") = " + supported + "\n\n";
+          text += "Billing supported for " + productType.getName() + " = " + supported + "\n\n";
           tvLog.setText(text + tvLog.getText().toString());
         }, this::manageException);
   }
@@ -104,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
         .subscribe(purchase -> {
           token = purchase.token();
           String text = "";
-          text += "You own " + purchase.sku() + " token(" + purchase.token() + ")\n\n";
+          text += "You own " + purchase.sku() + " token (" + purchase.token() + ")\n\n";
           tvLog.setText(text + tvLog.getText().toString());
         }, this::manageException);
   }
@@ -130,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
         .subscribe(purchase -> {
           token = "";
           String text = "";
-          text += "Product " + purchase.sku() + " with token(" + purchase.token() + ") consumed successfully\n\n";
+          text += "Product " + purchase.sku() + " with token (" + purchase.token() + ") was bought and consumed successfully\n\n";
           tvLog.setText(text + tvLog.getText().toString());
         }, this::manageException);
   }

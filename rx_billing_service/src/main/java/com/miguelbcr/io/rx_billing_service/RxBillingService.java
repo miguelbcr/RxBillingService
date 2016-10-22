@@ -138,7 +138,7 @@ public class RxBillingService {
    * Consume the last purchase of the given SKU. This will result in this item being removed
    * from all subsequent responses to getPurchases() and allow re-purchase of this item.
    * <br/><br/>
-   * Important: Managed in-app products are consumable, but subscriptions are not.
+   * Important: in-app products are consumable, but subscriptions are not.
    * <br/>
    * See https://developer.android.com/google/play/billing/billing_reference.html
    *

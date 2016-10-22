@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+  <string-array name="product_types">
+    <item>IN-APP</item>
+    <item>SUBS</item>
+  </string-array>
   <string-array name="product_ids">
     <item>android.test.purchased</item>
     <item>android.test.canceled</item>
