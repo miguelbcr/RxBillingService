@@ -3,11 +3,26 @@ package com.miguelbcr.io.rx_billing_service;
 import android.app.Activity;
 import android.app.Application;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
 import com.miguelbcr.io.rx_billing_service.entities.ProductType;
 import com.miguelbcr.io.rx_billing_service.entities.Purchase;
 import com.miguelbcr.io.rx_billing_service.entities.SkuDetails;
+import io.reactivex.CompletableObserver;
+import io.reactivex.CompletableSource;
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 import io.reactivex.Single;
+import io.reactivex.SingleObserver;
+import io.reactivex.SingleSource;
+import io.reactivex.functions.BooleanSupplier;
+import io.reactivex.functions.Function;
+import io.reactivex.functions.Predicate;
+import io.reactivex.subjects.PublishSubject;
+import java.util.ArrayList;
 import java.util.List;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.w3c.dom.Text;
 import rx_activity_result2.RxActivityResult;
 
 /**
@@ -76,25 +91,94 @@ public class RxBillingService {
     this.rxBillingServiceImpl = new RxBillingServiceImpl(targetUiObject);
   }
 
+  /**
+   * Checks support for the requested billing.
+   * <br/>
+   * See https://developer.android.com/google/play/billing/billing_reference.html
+   *
+   * @param productType {@link ProductType#IN_APP} or  {@link ProductType#SUBS}
+   * @return A boolean {@link Single}
+   */
   public Single<Boolean> isBillingSupported(ProductType productType) {
     return rxBillingServiceImpl.isBillingSupported(productType);
   }
 
+  /**
+   * Provides details of a list of SKUs (product ids).
+   * <br/>
+   * See https://developer.android.com/google/play/billing/billing_reference.html
+   *
+   * @param productType {@link ProductType#IN_APP} or  {@link ProductType#SUBS}
+   * @param productIds A list of SKUs. This API can be called with a maximum of 20 SKUs.
+   * @return A list of {@link SkuDetails} {@link Single}
+   */
   public Single<List<SkuDetails>> getSkuDetails(ProductType productType, List<String> productIds) {
-    return rxBillingServiceImpl.getSkuDetails(productType, productIds);
+    ArrayList<String> productIdsList = new ArrayList<>(productIds.size());
+    productIdsList.addAll(productIds);
+    return rxBillingServiceImpl.getSkuDetails(productType, productIdsList);
   }
 
+  /**
+   * Purchase for a {@code productId}
+   * <br/>
+   * See https://developer.android.com/google/play/billing/billing_reference.html
+   *
+   * @param productType {@link ProductType#IN_APP} or  {@link ProductType#SUBS}
+   * @param productId A SKU.
+   * @param developerPayload A developer-specified string that contains supplemental information
+   * about an order.
+   * @return A {@link Purchase} {@link Single}
+   */
   public Single<Purchase> purchase(ProductType productType, String productId,
       String developerPayload) {
     return rxBillingServiceImpl.purchase(productType, productId, developerPayload);
   }
 
-  public Single<Boolean> consumePurchase(String token) {
-    return rxBillingServiceImpl.consumePurchase(token);
+  /**
+   * Consume the last purchase of the given SKU. This will result in this item being removed
+   * from all subsequent responses to getPurchases() and allow re-purchase of this item.
+   * <br/><br/>
+   * Important: Managed in-app products are consumable, but subscriptions are not.
+   * <br/>
+   * See https://developer.android.com/google/play/billing/billing_reference.html
+   *
+   * @param purchaseToken Token in the {@link Purchase} object that identifies the purchase
+   * to be consumed
+   * @return A boolean {@link Single}
+   */
+  public Single<Boolean> consumePurchase(String purchaseToken) {
+    return rxBillingServiceImpl.consumePurchase(purchaseToken);
   }
 
+  /**
+   * Purchase for a {@code productId} and then consume it.
+   * <br/><br/>
+   * Important: Managed in-app products are consumable, but subscriptions are not.
+   * <br/>
+   * See https://developer.android.com/google/play/billing/billing_reference.html
+   *
+   * @param productType {@link ProductType#IN_APP} or  {@link ProductType#SUBS}
+   * @param productId A SKU.
+   * @param developerPayload A developer-specified string that contains supplemental information
+   * about an order.
+   * @return A {@link Purchase} {@link Single}
+   */
   public Single<Purchase> purchaseAndConsume(ProductType productType, String productId,
       String developerPayload) {
     return rxBillingServiceImpl.purchaseAndConsume(productType, productId, developerPayload);
+  }
+
+  /**
+   * Returns the current SKUs (product Ids) owned by the user, including both purchased items and
+   * items acquired by redeeming a promo code.
+   * <br/>
+   * This will return all SKUs that have been purchased in V3 and managed items purchased using
+   * V1 and V2 that have not been consumed.
+   *
+   * @param productType {@link ProductType#IN_APP} or  {@link ProductType#SUBS}
+   * @return A list of {@link Purchase} {@link Single}
+   */
+  public Single<List<Purchase>> getPurchases(final ProductType productType) {
+    return rxBillingServiceImpl.getPurchases(productType);
   }
 }

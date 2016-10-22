@@ -23,7 +23,7 @@ public class RootFragment extends Fragment {
 
   @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    textView = (TextView) view.findViewById(R.id.textView);
+    textView = (TextView) view.findViewById(R.id.tv_log);
 
     isBillingSupported(ProductType.IN_APP);
     isBillingSupported(ProductType.SUBS);

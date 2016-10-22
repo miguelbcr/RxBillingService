@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string-array name="product_ids">
+    <item>android.test.purchased</item>
+    <item>android.test.canceled</item>
+    <item>android.test.refunded</item>
+    <item>android.test.item_unavailable</item>
+  </string-array>
+</resources>

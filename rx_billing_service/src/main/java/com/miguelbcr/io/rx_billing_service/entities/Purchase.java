@@ -12,11 +12,6 @@ import com.google.gson.annotations.SerializedName;
  */
 @AutoValue
 public abstract class Purchase {
-    public static final String RESPONSE_CODE = "RESPONSE_CODE";
-    public static final String INAPP_PURCHASE_DATA = "INAPP_PURCHASE_DATA";
-    public static final String INAPP_DATA_SIGNATURE = "INAPP_DATA_SIGNATURE";
-    public static final String BUY_INTENT = "BUY_INTENT";
-
     /**
      * Indicates whether the subscription renews automatically.
      * If true, the subscription is active, and will automatically renew on the next billing date.

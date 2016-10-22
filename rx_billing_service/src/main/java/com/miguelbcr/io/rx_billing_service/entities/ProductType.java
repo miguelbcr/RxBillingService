@@ -5,7 +5,14 @@ package com.miguelbcr.io.rx_billing_service.entities;
  */
 
 public enum ProductType {
-  IN_APP("inapp"), SUBS("subs");
+  /**
+   * For an in-app product
+   */
+  IN_APP("inapp"),
+  /**
+   *  For subscriptions
+   */
+  SUBS("subs");
 
   private String name;
 

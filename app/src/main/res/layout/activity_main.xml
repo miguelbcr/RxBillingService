@@ -6,23 +6,93 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.miguelbcr.io.rxbillingservice.MainActivity">
+    android:gravity="center_horizontal"
+    tools:context="com.miguelbcr.io.rxbillingservice.MainActivity"
+    >
 
-  <Button
-      android:id="@+id/bt_buy"
+  <RelativeLayout
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="BUY"
+      android:background="@color/colorBlue"
+      >
+  <android.support.v7.widget.AppCompatSpinner
+      android:id="@+id/spinner"
+      android:layout_width="wrap_content"
+      android:layout_centerHorizontal="true"
+      android:layout_height="40dp"
       />
+  </RelativeLayout>
 
-  <TextView
-      android:id="@+id/textView"
-      android:layout_width="wrap_content"
+  <LinearLayout
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:padding="20dp"/>
+      android:orientation="horizontal"
+      >
+    <Button
+        android:id="@+id/bt_sku_details"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:text="DETAILS"
+        />
+    <Button
+        android:id="@+id/bt_buy"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:text="BUY"
+        />
+    <Button
+        android:id="@+id/bt_consume"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:text="CONSUME"
+        />
+  </LinearLayout>
+
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      >
+    <Button
+        android:id="@+id/bt_buy_consume"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:text="BUY AND CONSUME"
+        />
+    <Button
+        android:id="@+id/bt_my_purchases"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:text="MY PURCHASES"
+        />
+    <Button
+        android:id="@+id/bt_clear"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:text="CLEAR LOG"
+        />
+  </LinearLayout>
+
+  <ScrollView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      >
+    <TextView
+        android:id="@+id/tv_log"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp"
+        />
+  </ScrollView>
   <!--<fragment-->
-      <!--android:name="com.miguelbcr.io.rxbillingservice.RootFragment"-->
-      <!--android:layout_width="match_parent"-->
-      <!--android:layout_height="match_parent"-->
-      <!--/>-->
+  <!--android:name="com.miguelbcr.io.rxbillingservice.RootFragment"-->
+  <!--android:layout_width="match_parent"-->
+  <!--android:layout_height="match_parent"-->
+  <!--/>-->
 </LinearLayout>

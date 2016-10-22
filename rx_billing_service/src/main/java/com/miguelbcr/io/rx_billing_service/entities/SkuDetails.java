@@ -11,9 +11,6 @@ import com.google.gson.annotations.SerializedName;
  */
 @AutoValue
 public abstract class SkuDetails {
-    public static final String RESPONSE_CODE = "RESPONSE_CODE";
-    public static final String DETAILS_LIST = "DETAILS_LIST";
-
     /**
      * The product ID for the product.
      */
@@ -21,7 +18,7 @@ public abstract class SkuDetails {
     public abstract String sku();
 
     /**
-     *  “inapp” for an in-app product or "subs" for subscriptions.
+     *  "inapp" for an in-app product or "subs" for subscriptions.
      */
     public abstract String type();
 
