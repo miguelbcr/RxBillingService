@@ -67,14 +67,14 @@ class RxBillingServiceImpl {
         if (serviceConnection == null) {
           serviceConnection = new ServiceConnection() {
             @Override public void onServiceDisconnected(ComponentName name) {
-              RxBillingServiceLogger.log(getTargetClassName(), "Service Disconnected");
+              RxBillingServiceLogger.log(getTargetClassName(), "Service disconnected");
               appBillingService = null;
               emitter.onError(
                   new RxBillingServiceException(RxBillingServiceError.SERVICE_DISCONNECTED));
             }
 
             @Override public void onServiceConnected(ComponentName name, final IBinder service) {
-              RxBillingServiceLogger.log(getTargetClassName(), "Service Connected");
+              RxBillingServiceLogger.log(getTargetClassName(), "Service connected");
               appBillingService = IInAppBillingService.Stub.asInterface(service);
               emitter.onSuccess(Ignore.Get);
             }
@@ -89,7 +89,7 @@ class RxBillingServiceImpl {
   }
 
   private void bindService() {
-    RxBillingServiceLogger.log(getTargetClassName(), "Bind Service");
+    RxBillingServiceLogger.log(getTargetClassName(), "Bind service");
     Intent serviceIntent = new Intent("com.android.vending.billing.InAppBillingService.BIND");
     serviceIntent.setPackage("com.android.vending");
     context.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
@@ -97,7 +97,7 @@ class RxBillingServiceImpl {
 
   private void unbindService() {
     if (appBillingService != null) {
-      RxBillingServiceLogger.log(getTargetClassName(), "Unbind Service");
+      RxBillingServiceLogger.log(getTargetClassName(), "Unbind service");
       context.unbindService(serviceConnection);
       appBillingService = null;
       context = null;
@@ -113,7 +113,7 @@ class RxBillingServiceImpl {
                 productType.getName()) == RxBillingServiceError.OK;
 
         RxBillingServiceLogger.log(getTargetClassName(),
-            "is Billing Supported = " + isBillingSupported);
+            "Is billing (" + productType.getName() + ") supported = " + isBillingSupported);
         return Single.just(isBillingSupported);
       }
     }).doOnSuccess(new Consumer<Boolean>() {
@@ -135,7 +135,9 @@ class RxBillingServiceImpl {
         querySkus.putStringArrayList("ITEM_ID_LIST", productIds);
 
         RxBillingServiceLogger.log(getTargetClassName(),
-            "getting SkuDetails from " + TextUtils.join(", ", productIds));
+            "Getting SkuDetails (" + productType.getName() + "): " + TextUtils.join(", ",
+                productIds));
+
         return Single.just(appBillingService.getSkuDetails(VERSION, context.getPackageName(),
             productType.getName(), querySkus));
       }
@@ -143,6 +145,15 @@ class RxBillingServiceImpl {
       @Override public SingleSource<? extends List<SkuDetails>> apply(Bundle skuDetailsBundle)
           throws Exception {
         int response = skuDetailsBundle.getInt(RESPONSE_CODE, RxBillingServiceError.OK);
+
+        RxBillingServiceLogger.log(getTargetClassName(), "Getting SkuDetails ("
+            + productType.getName()
+            + ") "
+            + RESPONSE_CODE
+            + "="
+            + response
+            + " OK="
+            + (response == RxBillingServiceError.OK));
 
         if (response != RxBillingServiceError.OK) {
           return Single.error(new RxBillingServiceException(response));
@@ -155,6 +166,11 @@ class RxBillingServiceImpl {
             new GsonBuilder().registerTypeAdapterFactory(GsonAdapterFactory.create()).create();
 
         if (skuDetailsStrings == null) {
+          RxBillingServiceLogger.log(getTargetClassName(), "Getting SkuDetails ("
+              + productType.getName()
+              + ") '"
+              + DETAILS_LIST
+              + "' bundle arg is null");
           return Single.error(
               new RxBillingServiceException(RxBillingServiceError.PARSING_SKUDETAILS));
         }
@@ -163,6 +179,9 @@ class RxBillingServiceImpl {
           try {
             skuDetails.add(SkuDetails.typeAdapter(gson).fromJson(skuDetailString));
           } catch (IOException e) {
+            RxBillingServiceLogger.log(getTargetClassName(), "Getting SkuDetails ("
+                + productType.getName()
+                + ") error parsing SkuDetails object");
             e.printStackTrace();
             return Single.error(
                 new RxBillingServiceException(RxBillingServiceError.PARSING_SKUDETAILS));
@@ -202,20 +221,24 @@ class RxBillingServiceImpl {
       @Override public SingleSource<Purchase> apply(Single<Ignore> loader) throws Exception {
         return loader.map(new Function<Ignore, Bundle>() {
           @Override public Bundle apply(Ignore _I) throws Exception {
-            Bundle buyBundle =
-                appBillingService.getBuyIntent(VERSION, context.getPackageName(), productId,
-                    productType.getName(), developerPayload);
             RxBillingServiceLogger.log(getTargetClassName(),
-                "getBuyIntent() returns = " + buyBundle);
+                "Starting getBuyIntent() (" + productType.getName() + ")");
 
-            return buyBundle;
+            return appBillingService.getBuyIntent(VERSION, context.getPackageName(), productId,
+                productType.getName(), developerPayload);
           }
         }).flatMap(new Function<Bundle, SingleSource<Purchase>>() {
           @Override public SingleSource<Purchase> apply(Bundle buyBundle) throws Exception {
             int response = buyBundle.getInt(RESPONSE_CODE);
-            RxBillingServiceLogger.log(getTargetClassName(),
-                "getBuyIntent() bundle response code(" + response + ") OK = " + (response
-                    == RxBillingServiceError.OK));
+
+            RxBillingServiceLogger.log(getTargetClassName(), "getBuyIntent() ("
+                + productType.getName()
+                + ") bundle "
+                + RESPONSE_CODE
+                + "="
+                + response
+                + " OK="
+                + (response == RxBillingServiceError.OK));
 
             if (response != RxBillingServiceError.OK) {
               return Single.error(new RxBillingServiceException(response));
@@ -223,7 +246,8 @@ class RxBillingServiceImpl {
 
             PendingIntent pendingIntent = buyBundle.getParcelable(BUY_INTENT);
 
-            RxBillingServiceLogger.log(getTargetClassName(), "launch getBuyIntent()");
+            RxBillingServiceLogger.log(getTargetClassName(),
+                "Starting pending intent (" + productType.getName() + ")");
             if (targetUi.fragment() == null) {
               RxActivityResult.on(targetUi.activity())
                   .startIntentSender(pendingIntent.getIntentSender(), new Intent(), 0, 0, 0)
@@ -254,11 +278,12 @@ class RxBillingServiceImpl {
   }
 
   private Observable<Ignore> processActivityResult(Result result) {
-    RxBillingServiceLogger.log(getTargetClassName(),
-        "getBuyIntent() result code(" + result.resultCode() + ") OK = " + (result.resultCode()
-            == Activity.RESULT_OK));
-
     int response = result.data().getIntExtra(RESPONSE_CODE, RxBillingServiceError.OK);
+
+    RxBillingServiceLogger.log(getTargetClassName(),
+        "Pending intent bundle result code(" + result.resultCode() + ") OK=" + (result.resultCode()
+            == Activity.RESULT_OK) + ", " + RESPONSE_CODE + "=" + response + " OK=" + (response
+            == RxBillingServiceError.OK));
 
     if (result.resultCode() != Activity.RESULT_OK || response != RxBillingServiceError.OK) {
       purchaseSubject.onError(new RxBillingServiceException(response));
@@ -271,8 +296,12 @@ class RxBillingServiceImpl {
     Gson gson = new GsonBuilder().registerTypeAdapterFactory(GsonAdapterFactory.create()).create();
 
     if (TextUtils.isEmpty(purchaseString)) {
+      RxBillingServiceLogger.log(getTargetClassName(),
+          "getBuyIntent() '" + INAPP_PURCHASE_DATA + "' bundle arg is null");
+
       purchaseSubject.onError(
           new RxBillingServiceException(RxBillingServiceError.ITEM_UNAVAILABLE));
+
       return Observable.just(Ignore.Get);
     }
 
@@ -282,6 +311,8 @@ class RxBillingServiceImpl {
       purchaseSubject.onNext(purchase);
       purchaseSubject.onComplete();
     } catch (IOException e) {
+      RxBillingServiceLogger.log(getTargetClassName(),
+          "getBuyIntent() error parsing Purchase object");
       e.printStackTrace();
       purchaseSubject.onError(
           new RxBillingServiceException(RxBillingServiceError.PARSING_PURCHASE));
@@ -296,11 +327,14 @@ class RxBillingServiceImpl {
         int response =
             appBillingService.consumePurchase(VERSION, context.getPackageName(), purchaseToken);
 
+        RxBillingServiceLogger.log(getTargetClassName(),
+            "Consume purchase " + RESPONSE_CODE + "=" + response + " OK=" + (response
+                == RxBillingServiceError.OK) + " token=" + purchaseToken);
+
         if (response != RxBillingServiceError.OK) {
           return Single.error(new RxBillingServiceException(response));
         }
 
-        RxBillingServiceLogger.log(getTargetClassName(), "token consumed: " + purchaseToken);
         return Single.just(true);
       }
     }).doOnSuccess(new Consumer<Boolean>() {
@@ -314,7 +348,7 @@ class RxBillingServiceImpl {
     });
   }
 
-  Single<Purchase> purchaseAndConsume(ProductType productType, String productId,
+  Single<Purchase> purchaseAndConsume(final ProductType productType, String productId,
       String developerPayload) {
     return connectService().compose(purchaseTransformer(productType, productId, developerPayload))
         .flatMap(new Function<Purchase, SingleSource<? extends Purchase>>() {
@@ -323,11 +357,14 @@ class RxBillingServiceImpl {
             int response = appBillingService.consumePurchase(VERSION, context.getPackageName(),
                 purchase.token());
 
+            RxBillingServiceLogger.log(getTargetClassName(),
+                "Consume purchase " + RESPONSE_CODE + "=" + response + " OK=" + (response
+                    == RxBillingServiceError.OK) + " token=" + purchase.token());
+
             if (response != RxBillingServiceError.OK) {
               return Single.error(new RxBillingServiceException(response));
             }
 
-            RxBillingServiceLogger.log(getTargetClassName(), "token consumed: " + purchase.token());
             return Single.just(purchase);
           }
         })
@@ -349,6 +386,11 @@ class RxBillingServiceImpl {
       @Override public SingleSource<PurchasesToken> apply(Single<Ignore> loader) throws Exception {
         return loader.flatMap(new Function<Ignore, SingleSource<? extends Bundle>>() {
           @Override public SingleSource<? extends Bundle> apply(Ignore _I) throws Exception {
+            RxBillingServiceLogger.log(getTargetClassName(), "Getting purchases ("
+                + productType.getName()
+                + ") continuation token="
+                + continuationToken);
+
             return Single.just(appBillingService.getPurchases(VERSION, context.getPackageName(),
                 productType.getName(), continuationToken));
           }
@@ -356,6 +398,15 @@ class RxBillingServiceImpl {
           @Override public SingleSource<? extends PurchasesToken> apply(Bundle purchasesBundle)
               throws Exception {
             int response = purchasesBundle.getInt(RESPONSE_CODE);
+
+            RxBillingServiceLogger.log(getTargetClassName(), "Getting purchases ("
+                + productType.getName()
+                + ") "
+                + RESPONSE_CODE
+                + "="
+                + response
+                + " OK="
+                + (response == RxBillingServiceError.OK));
 
             if (response != RxBillingServiceError.OK) {
               return Single.error(new RxBillingServiceException(response));
@@ -370,6 +421,11 @@ class RxBillingServiceImpl {
                 new GsonBuilder().registerTypeAdapterFactory(GsonAdapterFactory.create()).create();
 
             if (purchasesStrings == null || signatures == null) {
+              RxBillingServiceLogger.log(getTargetClassName(), "Getting purchases ("
+                  + productType.getName()
+                  + ") '"
+                  + INAPP_PURCHASE_DATA_LIST
+                  + "' bundle arg is null");
               return Single.error(
                   new RxBillingServiceException(RxBillingServiceError.PARSING_PURCHASE));
             }
@@ -383,6 +439,9 @@ class RxBillingServiceImpl {
                 purchase.setSignature(signature);
                 purchases.add(purchase);
               } catch (IOException e) {
+                RxBillingServiceLogger.log(getTargetClassName(), "Getting purchases ("
+                    + productType.getName()
+                    + ") error parsing Purchase object");
                 e.printStackTrace();
                 return Single.error(
                     new RxBillingServiceException(RxBillingServiceError.PARSING_PURCHASE));
@@ -413,6 +472,8 @@ class RxBillingServiceImpl {
         })
         .map(new Function<PurchasesToken, List<Purchase>>() {
           @Override public List<Purchase> apply(PurchasesToken purchasesToken) throws Exception {
+            RxBillingServiceLogger.log(getTargetClassName(),
+                "Getting purchases (" + productType.getName() + ") size = " + purchases.size());
             return purchases;
           }
         })
