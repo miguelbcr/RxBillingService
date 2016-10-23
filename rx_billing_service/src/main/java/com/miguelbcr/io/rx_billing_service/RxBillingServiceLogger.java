@@ -3,16 +3,20 @@ package com.miguelbcr.io.rx_billing_service;
 import android.util.Log;
 
 class RxBillingServiceLogger {
+  private final boolean debug;
 
-  static void log(String message) {
-    if (BuildConfig.DEBUG) {
+  public RxBillingServiceLogger(boolean debug) {
+    this.debug = debug;
+  }
+
+  void log(String message) {
+    if (debug) {
       Log.d("RxBillingService", message);
     }
   }
 
-  static void log(String className, String message) {
-    //if (BuildConfig.DEBUG) {
-    if (true) {
+  void log(String className, String message) {
+    if (debug) {
       Log.d("RxBillingService", className + " > " + message);
     }
   }

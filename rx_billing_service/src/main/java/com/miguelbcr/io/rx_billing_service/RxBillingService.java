@@ -3,26 +3,12 @@ package com.miguelbcr.io.rx_billing_service;
 import android.app.Activity;
 import android.app.Application;
 import android.support.v4.app.Fragment;
-import android.text.TextUtils;
 import com.miguelbcr.io.rx_billing_service.entities.ProductType;
 import com.miguelbcr.io.rx_billing_service.entities.Purchase;
 import com.miguelbcr.io.rx_billing_service.entities.SkuDetails;
-import io.reactivex.CompletableObserver;
-import io.reactivex.CompletableSource;
-import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
 import io.reactivex.Single;
-import io.reactivex.SingleObserver;
-import io.reactivex.SingleSource;
-import io.reactivex.functions.BooleanSupplier;
-import io.reactivex.functions.Function;
-import io.reactivex.functions.Predicate;
-import io.reactivex.subjects.PublishSubject;
 import java.util.ArrayList;
 import java.util.List;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.w3c.dom.Text;
 import rx_activity_result2.RxActivityResult;
 
 /**
@@ -79,16 +65,16 @@ public class RxBillingService {
     RxActivityResult.register(application);
   }
 
-  public static <T extends Activity> RxBillingService getInstance(T activity) {
-    return new RxBillingService(activity);
+  public static <T extends Activity> RxBillingService getInstance(T activity, boolean debug) {
+    return new RxBillingService(activity, debug);
   }
 
-  public static <T extends Fragment> RxBillingService getInstance(T fragment) {
-    return new RxBillingService(fragment);
+  public static <T extends Fragment> RxBillingService getInstance(T fragment, boolean debug) {
+    return new RxBillingService(fragment, debug);
   }
 
-  private RxBillingService(Object targetUiObject) {
-    this.rxBillingServiceImpl = new RxBillingServiceImpl(targetUiObject);
+  private RxBillingService(Object targetUiObject, boolean debug) {
+    this.rxBillingServiceImpl = new RxBillingServiceImpl(targetUiObject, debug);
   }
 
   /**

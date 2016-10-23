@@ -13,7 +13,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 public class RootFragment extends Fragment {
-  private TextView textView;
 
   @Nullable @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -23,26 +22,5 @@ public class RootFragment extends Fragment {
 
   @Override public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    textView = (TextView) view.findViewById(R.id.tv_log);
-
-    isBillingSupported(ProductType.IN_APP);
-    isBillingSupported(ProductType.SUBS);
-  }
-
-  private void isBillingSupported(ProductType productType) {
-    RxBillingService.getInstance(this)
-        .isBillingSupported(productType)
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(supported -> {
-          String text = textView.getText().toString();
-          text += "Billing supported (" + productType.getName() + ") = " + supported + "\n";
-          textView.setText(text);
-        }, throwable -> {
-          throwable.printStackTrace();
-          String text = textView.getText().toString();
-          text += "error = " + throwable.getMessage() + "\n";
-          textView.setText(text);
-        });
   }
 }

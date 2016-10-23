@@ -13,7 +13,7 @@
   <LinearLayout
       android:layout_width="match_parent"
       android:layout_height="40dp"
-      android:background="@color/colorBlue"
+      android:background="@color/colorYellow"
       android:orientation="horizontal"
       >
     <android.support.v7.widget.AppCompatSpinner

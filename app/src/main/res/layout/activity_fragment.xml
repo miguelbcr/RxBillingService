@@ -8,8 +8,8 @@
     >
 
   <fragment
-      android:id="@+id/fragment_nested"
-      android:name="com.miguelbcr.io.rxbillingservice.NestedFragment"
+      android:id="@+id/fragment_root"
+      android:name="com.miguelbcr.io.rxbillingservice.RootFragment"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       />

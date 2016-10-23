@@ -9,14 +9,19 @@
       android:supportsRtl="true"
       android:name=".BaseApp"
       android:theme="@style/AppTheme">
-    <activity android:name=".MainActivity"
-        android:configChanges="layoutDirection|orientation|screenLayout|screenSize">
+    <activity android:name=".LaunchActivity">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
 
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
     </activity>
+
+    <activity android:name=".MainActivity"
+        android:configChanges="layoutDirection|orientation|screenLayout|screenSize"/>
+
+    <activity android:name=".HostActivityFragment"
+        android:configChanges="layoutDirection|orientation|screenLayout|screenSize"/>
   </application>
 
 </manifest>
