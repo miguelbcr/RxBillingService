@@ -44,7 +44,7 @@ class RxBillingServiceImpl {
   private static final String BUY_INTENT = "BUY_INTENT";
   private static final String DETAILS_LIST = "DETAILS_LIST";
 
-  private final int VERSION = 5;
+  private final int VERSION = 3;
   private final TargetUi targetUi;
   private Context context;
   private final RxBillingServiceLogger rxBillingServiceLogger;

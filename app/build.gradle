@@ -16,7 +16,7 @@ android {
   compileSdkVersion 24
   buildToolsVersion "24.0.1"
   defaultConfig {
-        applicationId "com.miguelbcr.io.rxbillingservice"
+        applicationId "com.miguelbcr.io.rxbillingservice.app"
     minSdkVersion 16
     targetSdkVersion 24
     versionCode 1

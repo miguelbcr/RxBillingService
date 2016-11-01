@@ -31,11 +31,11 @@ public class ViewHolder {
     return (ui instanceof Fragment) ? ((Fragment) ui).getContext() : ((Activity) ui);
   }
 
-  private RxBillingServiceFactory getRxBillingServiceInsatance(TextView tvLog) {
+  private RxBillingServiceWrapper getRxBillingServiceInsatance(TextView tvLog) {
     if (ui instanceof Fragment) {
-      return RxBillingServiceFactory.getInstance((Fragment) ui, tvLog);
+      return RxBillingServiceWrapper.getInstance((Fragment) ui, tvLog);
     } else {
-      return RxBillingServiceFactory.getInstance((Activity) ui, tvLog);
+      return RxBillingServiceWrapper.getInstance((Activity) ui, tvLog);
     }
   }
 
@@ -51,7 +51,7 @@ public class ViewHolder {
     Spinner spProductsIds = (Spinner) view.findViewById(R.id.spinner_product_ids);
     TextView tvLog = (TextView) view.findViewById(R.id.tv_log);
 
-    final RxBillingServiceFactory rxBillingServiceFactory = getRxBillingServiceInsatance(tvLog);
+    final RxBillingServiceWrapper rxBillingServiceWrapper = getRxBillingServiceInsatance(tvLog);
 
     initProductTypes(spProductsTypes);
     initProductIds(spProductsIds);
@@ -59,24 +59,24 @@ public class ViewHolder {
     btClear.setOnClickListener(v -> tvLog.setText(""));
 
     btSkuDetails.setOnClickListener(v -> {
-      rxBillingServiceFactory.skuDetails(productType, productId);
+      rxBillingServiceWrapper.skuDetails(productType, productId);
     });
 
     btBuy.setOnClickListener(v -> {
       final String developerPayload = String.valueOf(System.currentTimeMillis());
-      rxBillingServiceFactory.purchase(productType, productId, developerPayload);
+      rxBillingServiceWrapper.purchase(productType, productId, developerPayload);
     });
 
-    btConsume.setOnClickListener(v -> rxBillingServiceFactory.consumePurchase());
+    btConsume.setOnClickListener(v -> rxBillingServiceWrapper.consumePurchase());
 
     btBuyConsume.setOnClickListener(v -> {
       final String developerPayload = String.valueOf(System.currentTimeMillis());
-      rxBillingServiceFactory.purchaseAndConsume(productType, productId, developerPayload);
+      rxBillingServiceWrapper.purchaseAndConsume(productType, productId, developerPayload);
     });
 
-    btMyPurchases.setOnClickListener(v -> rxBillingServiceFactory.purchases(productType));
+    btMyPurchases.setOnClickListener(v -> rxBillingServiceWrapper.purchases(productType));
 
-    btSupported.setOnClickListener(v -> rxBillingServiceFactory.isBillingSupported(productType));
+    btSupported.setOnClickListener(v -> rxBillingServiceWrapper.isBillingSupported(productType));
   }
 
   private void initProductTypes(Spinner spinner) {

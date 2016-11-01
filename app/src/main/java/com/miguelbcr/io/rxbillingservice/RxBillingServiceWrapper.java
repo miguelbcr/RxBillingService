@@ -4,10 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.v4.app.Fragment;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
 import android.widget.TextView;
 import com.miguelbcr.io.rx_billing_service.*;
 import com.miguelbcr.io.rx_billing_service.BuildConfig;
@@ -17,22 +13,22 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import java.util.Arrays;
 
-public class RxBillingServiceFactory {
+public class RxBillingServiceWrapper {
   private static final String LAST_TOKEN = "LAST_TOKEN";
   private final Object ui;
   private final TextView tvLog;
 
-  public static <T extends Activity> RxBillingServiceFactory getInstance(T activity,
+  public static <T extends Activity> RxBillingServiceWrapper getInstance(T activity,
       TextView tvLog) {
-    return new RxBillingServiceFactory(activity, tvLog);
+    return new RxBillingServiceWrapper(activity, tvLog);
   }
 
-  public static <T extends Fragment> RxBillingServiceFactory getInstance(T fragment,
+  public static <T extends Fragment> RxBillingServiceWrapper getInstance(T fragment,
       TextView tvLog) {
-    return new RxBillingServiceFactory(fragment, tvLog);
+    return new RxBillingServiceWrapper(fragment, tvLog);
   }
 
-  private RxBillingServiceFactory(Object ui, TextView tvLog) {
+  private RxBillingServiceWrapper(Object ui, TextView tvLog) {
     this.ui = ui;
     this.tvLog = tvLog;
   }

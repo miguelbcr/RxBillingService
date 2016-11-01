@@ -13,6 +13,10 @@ public class RxBillingServiceException extends Throwable {
     this.message = RxBillingServiceError.getMessage(code);
   }
 
+  /**
+   * See {@link RxBillingServiceError}
+   * @return
+   */
   public int getCode() {
     return code;
   }
