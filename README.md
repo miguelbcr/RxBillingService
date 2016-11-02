@@ -1,14 +1,15 @@
 # RxBillingService
 
-RxJava extension for Android [In-App Billing](https://developer.android.com/google/play/billing/index.html) [version 3](https://developer.android.com/google/play/billing/api.html) .
+RxJava 2 extension for Android [In-App Billing](https://developer.android.com/google/play/billing/index.html) [version 3](https://developer.android.com/google/play/billing/api.html) .
 
 Currently is only tested for `inapp` products, not `subs`
 
 ## Features:
  
+- No configuration: no [IInAppBillingService.aidl](https://github.com/miguelbcr/RxBillingService/blob/master/rx_billing_service/src/main/aidl/com/android/vending/billing/IInAppBillingService.aidl) , no billing permission in `Manifest.xml`, no `activity` or `fragment` lifecycle.
 - Works in activities and fragments.
 - Reactive calls, so you don't need `onActivityResult()` anymore.
-- You will get the proper object (`Purchase`, `SkuDetails`, `Boolean`) or `RxBillingServiceException` if something went wrong.
+- You will get the proper object ( [Purchase](https://github.com/miguelbcr/RxBillingService/blob/master/rx_billing_service/src/main/java/com/miguelbcr/io/rx_billing_service/entities/Purchase.java) , [SkuDetails](https://github.com/miguelbcr/RxBillingService/blob/master/rx_billing_service/src/main/java/com/miguelbcr/io/rx_billing_service/entities/SkuDetails.java), `Boolean`) or [RxBillingServiceException](https://github.com/miguelbcr/RxBillingService/blob/master/rx_billing_service/src/main/java/com/miguelbcr/io/rx_billing_service/RxBillingServiceException.java) if something went wrong.
 
 
 ## Setup
@@ -48,17 +49,25 @@ public class SampleApp extends Application {
 
 In order to avoid recreate the `activity` or `fragment` by rotating the screen during the transaction, which will result a malfunction, you will have to add this to your `activity` in the `Manifest.xml`:
 
-> `android:configChanges="layoutDirection|orientation|screenLayout|screenSize"`
+```
+android:configChanges="layoutDirection|orientation|screenLayout|screenSize"
+``` 
 
 or you could define the screen orientation to your `activity` in the `Manifest.xml` by adding, for instance:
 
-> `android:screenOrientation="portrait"`
+```
+android:screenOrientation="portrait"
+```
 
 ## Methods available
 ### Checking whether the billing service is available
 
-> `Single<Boolean> isBillingSupported(ProductType productType)`
+Sginature:
+```java
+Single<Boolean> isBillingSupported(ProductType productType)
+``` 
 
+Example:
 ```java
 RxBillingService.getInstance(this, BuildConfig.DEBUG)
         .isBillingSupported(ProductType.IN_APP)
@@ -75,8 +84,12 @@ RxBillingService.getInstance(this, BuildConfig.DEBUG)
 
 ### Getting product details
 
-> `Single<List<SkuDetails>> getSkuDetails(ProductType productType, List<String> productIds)`
+Sginature:
+```java
+Single<List<SkuDetails>> getSkuDetails(ProductType productType, List<String> productIds)
+``` 
 
+Example:
 ```java
 RxBillingService.getInstance(this, BuildConfig.DEBUG)
         .getSkuDetails(ProductType.IN_APP, Arrays.asList("my-sku", "my-product_id"))
@@ -93,8 +106,12 @@ RxBillingService.getInstance(this, BuildConfig.DEBUG)
 
 ### Purchasing a product
 
-> `Single<Purchase> purchase(ProductType productType, String productId, String developerPayload)`
+Sginature:
+```java
+Single<Purchase> purchase(ProductType productType, String productId, String developerPayload)
+``` 
 
+Example:
 ```java
     final String developerPayload = String.valueOf(System.currentTimeMillis());
     
@@ -113,8 +130,12 @@ RxBillingService.getInstance(this, BuildConfig.DEBUG)
 
 ### Consuming a purchase
 
-> `Single<Boolean> consumePurchase(String purchaseToken)`
+Sginature:
+```java
+Single<Boolean> consumePurchase(String purchaseToken)
+``` 
 
+Example:
 ```java
     final String token = purchase.token();
     ...
@@ -133,8 +154,12 @@ RxBillingService.getInstance(this, BuildConfig.DEBUG)
 
 ### Purchasing and consuming a product at once
 
-> `Single<Purchase> purchaseAndConsume(ProductType productType, String productId, String developerPayload)`
+Sginature:
+```java
+Single<Purchase> purchaseAndConsume(ProductType productType, String productId, String developerPayload)
+``` 
 
+Example:
 ```java
     final String developerPayload = String.valueOf(System.currentTimeMillis());
     
@@ -153,8 +178,12 @@ RxBillingService.getInstance(this, BuildConfig.DEBUG)
 
 ### Getting your purchases
 
-> `Single<List<Purchase>> getPurchases(final ProductType productType)`
+Sginature:
+```java
+Single<List<Purchase>> getPurchases(final ProductType productType)
+``` 
 
+Example:
 ```java
     RxBillingService.getInstance(this, BuildConfig.DEBUG)
         .getPurchases(ProductType.IN_APP)
@@ -173,7 +202,7 @@ RxBillingService.getInstance(this, BuildConfig.DEBUG)
 
 If an error happens during the transaction you can check the exception thrown in the `subscribe()`. 
 
-You can handle [Google Play errors](https://developer.android.com/google/play/billing/billing_reference.html#billing-codes) by checking the Throwable instance and getting the code defined in `RxBillingServiceError`:
+You can handle [Google Play errors](https://developer.android.com/google/play/billing/billing_reference.html#billing-codes) by checking if the Throwable instance is a [RxBillingServiceException](https://github.com/miguelbcr/RxBillingService/blob/master/rx_billing_service/src/main/java/com/miguelbcr/io/rx_billing_service/RxBillingServiceException.java) object and getting the code defined in [RxBillingServiceError](https://github.com/miguelbcr/RxBillingService/blob/master/rx_billing_service/src/main/java/com/miguelbcr/io/rx_billing_service/RxBillingServiceError.java) :
 
 ```java
     ...

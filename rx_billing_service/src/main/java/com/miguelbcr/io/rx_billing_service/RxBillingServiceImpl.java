@@ -220,7 +220,7 @@ class RxBillingServiceImpl {
   private SingleTransformer<Ignore, Purchase> purchaseTransformer(final ProductType productType,
       final String productId, final String developerPayload) {
     return new SingleTransformer<Ignore, Purchase>() {
-      @Override public SingleSource<Purchase> apply(Single<Ignore> loader) throws Exception {
+      @Override public SingleSource<Purchase> apply(Single<Ignore> loader) {
         return loader.map(new Function<Ignore, Bundle>() {
           @Override public Bundle apply(Ignore _I) throws Exception {
             rxBillingServiceLogger.log(getTargetClassName(),
@@ -272,7 +272,7 @@ class RxBillingServiceImpl {
                   .subscribe();
             }
 
-            return purchaseSubject.toSingle();
+            return purchaseSubject.singleOrError();
           }
         });
       }
@@ -385,7 +385,7 @@ class RxBillingServiceImpl {
   private SingleTransformer<Ignore, PurchasesToken> getPurchasesTransformer(
       final ProductType productType, final String continuationToken) {
     return new SingleTransformer<Ignore, PurchasesToken>() {
-      @Override public SingleSource<PurchasesToken> apply(Single<Ignore> loader) throws Exception {
+      @Override public SingleSource<PurchasesToken> apply(Single<Ignore> loader) {
         return loader.flatMap(new Function<Ignore, SingleSource<? extends Bundle>>() {
           @Override public SingleSource<? extends Bundle> apply(Ignore _I) throws Exception {
             rxBillingServiceLogger.log(getTargetClassName(), "Getting purchases ("
@@ -478,8 +478,7 @@ class RxBillingServiceImpl {
                 "Getting purchases (" + productType.getName() + ") size = " + purchases.size());
             return purchases;
           }
-        })
-        .toSingle()
+        }).singleOrError()
         .doOnSuccess(new Consumer<List<Purchase>>() {
           @Override public void accept(List<Purchase> _I) throws Exception {
             unbindService();
