@@ -26,8 +26,7 @@ allprojects {
 And add next dependencies in the build.gradle of the module:
 ```gradle
 dependencies {
-    compile "com.github.miguelbcr:RxBillingService:0.0.1"
-    compile "io.reactivex.rxjava2:rxjava:2.0.0"
+    compile "com.github.miguelbcr:RxBillingService:0.0.3"
     compile 'io.reactivex.rxjava2:rxandroid:2.0.0'
 }
 ```
